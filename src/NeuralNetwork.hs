@@ -31,30 +31,39 @@ module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
   ---------------------------------------------------------------------------------
   -- IMPLEMENTATION
   ---------------------------------------------------------------------------------
+  
+  -- Calculates output vector for a single layer
   layerOutput layer input = Matrix.mapCol (\_ x -> sigmoid x) 1 (weightedInput layer input)
 
+  -- Calculates output of neural network by feeding signal forward through each layer
   feed []     input = input
-  feed (l:ls) input = networkOutput ls (layerOutput l input)
+  feed (l:ls) input = feed ls (layerOutput l input)
 
+  -- Calculates weighted input for a single layer (sum of all weights * input + bias)
   weightedInput layer input = Matrix.elementwise (+) (Matrix.multStd (weights layer) input) (biases layer)
 
+  -- Sigmoid function used for calculating single neuron's output
   sigmoid x = 1/(1 + exp (-x))
   sigmoid' x = exp(x) / (1+exp(x))^2
 
+  -- Calculates error vector for a single layer (should not be applied to the last layer of a network)
   layerError weightedInput nextWeights nextError =
       Matrix.elementwise
         (\a b -> a * sigmoid'(b))
         (multStd (Matrix.transpose nextWeights) nextError)
         weightedInput
 
+  -- Calculates error vector for last layer in network
   lastLayerError weightedInput output expected =
       Matrix.elementwise
         (\a b -> a * sigmoid'(b))
         (Matrix.elementwise (\a b -> b-a) output expected)
         weightedInput
 
+  -- Calculates vector of Cost function partial derivatives with respect to biases for a single layer
   costDerivativeWithRespectToBiases error = error
-
+  
+  -- Calculates vector of Cost function partial derivatives with respect to weights for a single layer
   costDerivativeWithRespectToWeights prevOutput error = Matrix.fromList height width values
         where
           height = Matrix.nrows error
@@ -64,6 +73,8 @@ module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
                 errorList = Matrix.toList error
                 prevOutputList = Matrix.toList prevOutput
 
+                
+  -- Applies backpropagation learning algorithm to neural network
   learn input expected learningRate []                      = []
 
   learn input expected learningRate (layer:[])              = [ Layer newWeights newBiases ]
