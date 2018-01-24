@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+  import NeuralNetwork
 
-main :: IO ()
-main = someFunc
+  main :: IO ()
+  main = 
