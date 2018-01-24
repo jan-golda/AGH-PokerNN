@@ -27,6 +27,7 @@ module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
 
   feed :: NeuralNetwork -> Matrix Double -> Matrix Double
   learn :: Matrix Double -> Matrix Double -> Double -> NeuralNetwork -> NeuralNetwork
+  backpropagation :: Matrix Double -> Matrix Double -> Double -> NeuralNetwork -> (NeuralNetwork, Matrix Double)
 
   ---------------------------------------------------------------------------------
   -- IMPLEMENTATION
@@ -60,10 +61,10 @@ module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
         (Matrix.elementwise (\a b -> b-a) output expected)
         weightedInput
 
-  -- Calculates vector of Cost function partial derivatives with respect to biases for a single layer
+  -- Calculates vector of cost function partial derivatives with respect to biases for a single layer
   costDerivativeWithRespectToBiases error = error
   
-  -- Calculates vector of Cost function partial derivatives with respect to weights for a single layer
+  -- Calculates vector of cost function partial derivatives with respect to weights for a single layer
   costDerivativeWithRespectToWeights prevOutput error = Matrix.fromList height width values
         where
           height = Matrix.nrows error
@@ -74,18 +75,31 @@ module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
                 prevOutputList = Matrix.toList prevOutput
 
                 
+  -- Performs network learning on a given dataset with gradient descent cost function minimization 
+  learn input expected learningRate [] = []
+
+  learn input expected learningRate network = newNetwork
+    where (newNetwork, _) = backpropagation input expected learningRate network 
+  
+  
   -- Applies backpropagation learning algorithm to neural network
-  learn input expected learningRate []                      = []
-
-  learn input expected learningRate (layer:[])              = [ Layer newWeights newBiases ]
-        where
-          newWeights = Matrix.elementwise (+) (weights layer) (Matrix.scaleMatrix learningRate derWeights)
-          newBiases = Matrix.elementwise (+) (biases layer) (Matrix.scaleMatrix learningRate derBiases)
-              where
-                  derWeights = costDerivativeWithRespectToWeights input error
-                  derBiases = costDerivativeWithRespectToBiases error
-                      where
-                        error = lastLayerError (weightedInput layer) (layerOutput layer input) expected
-
-
-  learn input expected learningRate (layer1:layer2:network) = network
+  backpropagation input expected learningRate (layer:[]) = 
+        let
+            error = lastLayerError (weightedInput layer input) (layerOutput layer input) expected
+            derWeights = costDerivativeWithRespectToWeights input error
+            derBiases = costDerivativeWithRespectToBiases error
+            newWeights = Matrix.elementwise (+) (weights layer) (Matrix.scaleMatrix learningRate derWeights)
+            newBiases = Matrix.elementwise (+) (biases layer) (Matrix.scaleMatrix learningRate derBiases)
+        in
+            ([ Layer newWeights newBiases ], error)
+            
+  backpropagation input expected learningRate (layer1:layer2:network) = 
+        let
+            (network, nextError) = backpropagation (layerOutput layer1 input) expected learningRate (layer2:network)
+            error = layerError (weightedInput layer1 input) (weights layer2) nextError
+            derWeights = costDerivativeWithRespectToWeights input error
+            derBiases = costDerivativeWithRespectToBiases error
+            newWeights = Matrix.elementwise (+) (weights layer1) (Matrix.scaleMatrix learningRate derWeights)
+            newBiases = Matrix.elementwise (+) (biases layer1) (Matrix.scaleMatrix learningRate derBiases)
+        in
+            ([ Layer newWeights newBiases ] ++ network, error)
