@@ -1,4 +1,4 @@
-module NeuralNetwork (NeuralNetwork, Layer, networkOutput) where
+module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
 
   import Data.Matrix as Matrix
 
@@ -13,7 +13,6 @@ module NeuralNetwork (NeuralNetwork, Layer, networkOutput) where
   -- DEFINITIONS
   ---------------------------------------------------------------------------------
   layerOutput :: Layer -> Matrix Double -> Matrix Double
-  networkOutput :: NeuralNetwork -> Matrix Double -> Matrix Double
 
   weightedInput :: Layer -> Matrix Double -> Matrix Double
 
@@ -26,6 +25,7 @@ module NeuralNetwork (NeuralNetwork, Layer, networkOutput) where
   costDerivativeWithRespectToBiases :: Matrix Double -> Matrix Double
   costDerivativeWithRespectToWeights :: Matrix Double -> Matrix Double -> Matrix Double
 
+  feed :: NeuralNetwork -> Matrix Double -> Matrix Double
   learn :: Matrix Double -> Matrix Double -> Double -> NeuralNetwork -> NeuralNetwork
 
   ---------------------------------------------------------------------------------
@@ -33,8 +33,8 @@ module NeuralNetwork (NeuralNetwork, Layer, networkOutput) where
   ---------------------------------------------------------------------------------
   layerOutput layer input = Matrix.mapCol (\_ x -> sigmoid x) 1 (weightedInput layer input)
 
-  networkOutput []     input = input
-  networkOutput (l:ls) input = networkOutput ls (layerOutput l input)
+  feed []     input = input
+  feed (l:ls) input = networkOutput ls (layerOutput l input)
 
   weightedInput layer input = Matrix.elementwise (+) (Matrix.multStd (weights layer) input) (biases layer)
 
