@@ -39,12 +39,12 @@ module NeuralNetwork (NeuralNetwork, Layer, feed, learn) where
   -- Sigmoid function used for calculating single neuron's output
   
   sigmoid :: Double -> Double
+  sigmoid x = 1/(1 + exp (-x))
   
   
   
   -- Sigmoid function derivative
   
-  sigmoid x = 1/(1 + exp (-x))
   sigmoid' :: Double -> Double
   sigmoid' x = exp(x) / (1+exp(x))^2
   
