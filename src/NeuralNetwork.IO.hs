@@ -3,10 +3,11 @@
 --        weights - list of wieghts, grouped by neurons
 --        biases - list of biases
 
-module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer, serializeLayer, deserializeNetwork, serializeNetwork) where
+module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer, serializeLayer, deserializeNetwork, serializeNetwork, randomNeuralNetwork, randomLayer) where
 
   import NeuralNetwork
   import Data.Matrix as Matrix
+  import Data.Random.Normal as Normal
 
   ---------------------------------------------------------------------------------
   -- MAIN FUNCTIONS
@@ -17,6 +18,19 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
 
   writeNeuralNetwork :: FilePath -> NeuralNetwork -> IO ()
   writeNeuralNetwork path network = writeFile path (unparseFile . serializeNetwork $ network)
+
+  randomNeuralNetwork :: Int -> [Int] -> IO NeuralNetwork
+  randomNeuralNetwork nInputs [] = return []
+  randomNeuralNetwork nInputs (n:rest) = do
+      layer   <- randomLayer nInputs n
+      network <- randomNeuralNetwork nInputs rest
+      return (layer : network)
+
+  randomLayer :: Int -> Int -> IO Layer
+  randomLayer nInputs n = do
+      weights <- normalMatrix n nInputs
+      biases  <- normalMatrix n 1
+      return (Layer weights biases)
 
   ---------------------------------------------------------------------------------
   -- SERIALIZATION FUNCTIONS
@@ -39,10 +53,10 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
   serializeNetwork []           = []
   serializeNetwork (layer:rest) = serializeLayer layer ++ serializeNetwork rest
 
-
   ---------------------------------------------------------------------------------
   -- UTILITY FUNCTIONS
   ---------------------------------------------------------------------------------
+
   parseLine :: String -> [Double]
   parseLine line = map read (words line)
 
@@ -60,3 +74,6 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
 
   toMatrix :: Int -> [a] -> Matrix a
   toMatrix rows list = Matrix.fromList rows (quot (length list) rows) list
+
+  normalMatrix :: Int -> Int -> IO (Matrix Double)
+  normalMatrix x y = fmap (Matrix.fromList x y) Normal.normalsIO
