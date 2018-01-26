@@ -30,8 +30,14 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   
   
   
-  --epochTraining :: NeuralNetwork -> TrainingSet -> Double -> Int -> NeuralNetwork
-  --epochTraining network trainingSet learningRate
+  -- Performs given number of epochs of network training on given TrainingSet
+  
+  epochTraining :: NeuralNetwork -> TrainingSet -> Double -> Int -> NeuralNetwork
+  epochTraining network _ _ 0 = network
+  epochTraining network trainingSet learningRate epochsNumber = newNetwork newSet learningRate (epochsNumber - 1)
+    where 
+        newNetwork = trainOnSet network trainingSet learningRate
+        newSet = trainingSetShuffle trainingSet
   
   
   
