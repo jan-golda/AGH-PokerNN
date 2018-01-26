@@ -19,16 +19,32 @@ module NeuralNetwork.IO (readNeuralNetwork) where
       where
         n = length biases
 
+  serializeLayer :: Layer -> [[Double]]
+  serializeLayer layer = [Matrix.toList (weights layer), Matrix.toList (biases layer)]
+
   deserializeNetwork :: [[Double]] -> NeuralNetwork
   deserializeNetwork []         = []
   deserializeNetwork (a:[])     = error "Number of network data rows must be even"
   deserializeNetwork (a:b:rest) = deserializeLayer a b : deserializeNetwork rest
 
+  serializeNetwork :: NeuralNetwork -> [[Double]]
+  serializeNetwork []           = []
+  serializeNetwork (layer:rest) = serializeLayer layer ++ serializeNetwork rest
+
   parseLine :: String -> [Double]
   parseLine line = map read (words line)
+
+  unparseLine :: [Double] -> String
+  unparseLine list = unwords (map show list)
 
   parseFile :: String -> [[Double]]
   parseFile file = map parseLine (lines file)
 
+  unparseFile :: [[Double]] -> String
+  unparseFile list = unlines (map unparseLine list)
+
   readNeuralNetwork :: FilePath -> IO NeuralNetwork
   readNeuralNetwork = fmap (deserializeNetwork . parseFile) . readFile
+
+  writeNeuralNetwork :: FilePath -> NeuralNetwork -> IO ()
+  writeNeuralNetwork path network = writeFile path (unparseFile . serializeNetwork $ network)
