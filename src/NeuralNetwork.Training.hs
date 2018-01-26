@@ -20,11 +20,18 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   trainOnCase :: NeuralNetwork -> TrainingCase -> Double -> NeuralNetwork
   trainOnCase network trainingCase learningRate = NeuralNetwork.learn (input trainingCase) (expected trainingCase) learningRate network
   
+  
+  
   -- Trains network on given dataset
   
-  setTrain :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
+  trainOnSet :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
   trainOnSet network [] _ = network
   trainOnSet network (x:xs) learningRate = trainOnSet (trainOnCase network x learningRate) xs learningRate
+  
+  
+  
+  --epochTraining :: NeuralNetwork -> TrainingSet -> Double -> Int -> NeuralNetwork
+  --epochTraining network trainingSet learningRate
   
   
   
