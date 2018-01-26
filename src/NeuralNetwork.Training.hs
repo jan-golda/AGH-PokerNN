@@ -17,14 +17,14 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   
   -- Trains network on a single training case
                                               
-  singleCaseTrain :: NeuralNetwork -> TrainingCase -> Double -> NeuralNetwork
-  singleCaseTrain network trainingCase learningRate = NeuralNetwork.learn (input trainingCase) (expected trainingCase) learningRate network
+  trainOnCase :: NeuralNetwork -> TrainingCase -> Double -> NeuralNetwork
+  trainOnCase network trainingCase learningRate = NeuralNetwork.learn (input trainingCase) (expected trainingCase) learningRate network
   
   -- Trains network on given dataset
   
   setTrain :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
-  setTrain network [] _ = network
-  setTrain network (x:xs) learningRate = setTrain (singleCaseTrain network x learningRate) xs learningRate
+  trainOnSet network [] _ = network
+  trainOnSet network (x:xs) learningRate = trainOnSet (trainOnCase network x learningRate) xs learningRate
   
   
   
@@ -52,3 +52,6 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   --
   -- Matrix representation of output is a singla column matrix with 10 rows, all zeros except for row corresponding with proper hand strength
   -}
+  
+  
+  

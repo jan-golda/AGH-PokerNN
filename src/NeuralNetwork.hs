@@ -40,7 +40,14 @@ module NeuralNetwork (NeuralNetwork, Layer(Layer, weights, biases), feed, learn)
 
   sigmoid :: Double -> Double
   sigmoid x = 1/(1 + exp (-x))
+  
+  
 
+  -- Cost function used for estimating network performance
+  cost :: Matrix Double -> Matrix Double -> Double
+  cost output expected = 1/(2*n) * (foldl (+) 0 $ Matrix.toList (Matrix.elementwise costF output expected))
+    where costF = \x y -> (x - y) ** 2.0
+          n = fromIntegral(Matrix.nrows output)
 
 
   -- Sigmoid function derivative
@@ -144,4 +151,5 @@ module NeuralNetwork (NeuralNetwork, Layer(Layer, weights, biases), feed, learn)
   ratio = 0.4
 
   test = learn input expected ratio
+  
   -}
