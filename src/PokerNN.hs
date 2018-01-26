@@ -1,12 +1,24 @@
-module PokerNN where
+module PokerNN (loadTreningSet) where
 
   import NeuralNetwork.Training
 
   import Data.Matrix as Matrix
 
   ---------------------------------------------------------------------------------
+  -- MAIN FUNCTIONS
+  ---------------------------------------------------------------------------------
+
+  -- | Creates training set from data in file
+  loadTreningSet :: FilePath -> Int -> IO TrainingSet
+  loadTreningSet path n = fmap (intListToTrainingSet . (take (n*11))) (loadTreningData path)
+
+  ---------------------------------------------------------------------------------
   -- UTILITY FUNCTIONS
   ---------------------------------------------------------------------------------
+
+  -- | Loads list of ints from file
+  loadTreningData :: FilePath -> IO [Int]
+  loadTreningData path = fmap (map (read :: String -> Int)) (fmap words (readFile path))
 
   -- | Converts Int list TestCase input representation to proper Matrix compatible with NeuralNetwork input
   intListToMatrixInput :: [Int] -> Matrix Double
