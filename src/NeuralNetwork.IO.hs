@@ -3,16 +3,24 @@
 --        weights - list of wieghts, grouped by neurons
 --        biases - list of biases
 
-module NeuralNetwork.IO (readNeuralNetwork) where
+module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer, serializeLayer, deserializeNetwork, serializeNetwork) where
 
   import NeuralNetwork
   import Data.Matrix as Matrix
 
-  toVector :: Int -> [a] -> Matrix a
-  toVector rows list = Matrix.fromList rows 1 list
+  ---------------------------------------------------------------------------------
+  -- MAIN FUNCTIONS
+  ---------------------------------------------------------------------------------
 
-  toMatrix :: Int -> [a] -> Matrix a
-  toMatrix rows list = Matrix.fromList rows (quot (length list) rows) list
+  readNeuralNetwork :: FilePath -> IO NeuralNetwork
+  readNeuralNetwork = fmap (deserializeNetwork . parseFile) . readFile
+
+  writeNeuralNetwork :: FilePath -> NeuralNetwork -> IO ()
+  writeNeuralNetwork path network = writeFile path (unparseFile . serializeNetwork $ network)
+
+  ---------------------------------------------------------------------------------
+  -- SRIALIZATION FUNCTIONS
+  ---------------------------------------------------------------------------------
 
   deserializeLayer :: [Double] -> [Double] -> Layer
   deserializeLayer weights biases = Layer (toMatrix n weights) (toVector n biases)
@@ -31,6 +39,10 @@ module NeuralNetwork.IO (readNeuralNetwork) where
   serializeNetwork []           = []
   serializeNetwork (layer:rest) = serializeLayer layer ++ serializeNetwork rest
 
+
+  ---------------------------------------------------------------------------------
+  -- UTILITY FUNCTIONS
+  ---------------------------------------------------------------------------------
   parseLine :: String -> [Double]
   parseLine line = map read (words line)
 
@@ -43,8 +55,8 @@ module NeuralNetwork.IO (readNeuralNetwork) where
   unparseFile :: [[Double]] -> String
   unparseFile list = unlines (map unparseLine list)
 
-  readNeuralNetwork :: FilePath -> IO NeuralNetwork
-  readNeuralNetwork = fmap (deserializeNetwork . parseFile) . readFile
+  toVector :: Int -> [a] -> Matrix a
+  toVector rows list = Matrix.fromList rows 1 list
 
-  writeNeuralNetwork :: FilePath -> NeuralNetwork -> IO ()
-  writeNeuralNetwork path network = writeFile path (unparseFile . serializeNetwork $ network)
+  toMatrix :: Int -> [a] -> Matrix a
+  toMatrix rows list = Matrix.fromList rows (quot (length list) rows) list
