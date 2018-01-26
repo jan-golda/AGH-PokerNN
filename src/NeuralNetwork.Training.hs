@@ -29,6 +29,12 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
 
   trainingSetShuffle :: TrainingSet -> IO TrainingSet
   trainingSetShuffle = Shuffle.shuffleM
+  
+  epochTraining :: NeuralNetwork -> TrainingSet -> Double -> Int -> NeuralNetwork
+  epochTraining network _ _ 0 = network
+  epochTraining network trainingSet learningRate epochsNumber = epochTraining newNetwork trainingSet learningRate epochsNumber
+    where newNetwork = trainOnSet network trainingSet learningRate
+      
 
   {-
   -- Int list representation of test case input:
