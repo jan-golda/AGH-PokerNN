@@ -1,11 +1,14 @@
 module PokerNN where
 
   import NeuralNetwork.Training
-  
+
   import Data.Matrix as Matrix
 
-  -- Converts Int list TestCase input representation to proper Matrix compatible with NeuralNetwork input
+  ---------------------------------------------------------------------------------
+  -- UTILITY FUNCTIONS
+  ---------------------------------------------------------------------------------
 
+  -- | Converts Int list TestCase input representation to proper Matrix compatible with NeuralNetwork input
   intListToMatrixInput :: [Int] -> Matrix Double
   intListToMatrixInput intListInput =
       let
@@ -16,10 +19,7 @@ module PokerNN where
       in
           Matrix.fromList 52 1 presenceList
 
-
-
-  -- Converts Int TestCase output respresentation to Matrix representing network's expected output
-
+  -- | Converts Int TestCase output respresentation to Matrix representing network's expected output
   intToMatrixOutput :: Int -> Matrix Double
   intToMatrixOutput intOutput =
       let
@@ -27,16 +27,14 @@ module PokerNN where
       in
           Matrix.fromList 10 1 handsList
 
-
-  -- Converts list of Ints (first 11 elements) to single TrainingCase
-
+  -- | Converts list of Ints (first 11 elements) to single TrainingCase
   intListToTrainingCase :: [Int] -> TrainingCase
   intListToTrainingCase intList = TrainingCase (intListToMatrixInput intListInput) (intToMatrixOutput intOutput)
       where
           intListInput = take 10 intList
           intOutput = head.reverse.(take 11) $ intList
 
-
+  -- | Converts list of ints to TrainingSet
   intListToTrainingSet :: [Int] -> TrainingSet
   intListToTrainingSet list =
       if length list < 11 then []

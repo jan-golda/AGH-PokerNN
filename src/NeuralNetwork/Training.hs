@@ -1,40 +1,41 @@
 module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), TrainingSet, trainOnCase, trainOnSet, trainingSetShuffle) where
 
+  import NeuralNetwork
+
   import System.Random.Shuffle as Shuffle
   import Data.Matrix as Matrix
-  import NeuralNetwork
 
   ---------------------------------------------------------------------------------
   -- TYPE DEFINITIONS
   ---------------------------------------------------------------------------------
+
   data TrainingCase = TrainingCase {input :: Matrix Double, expected :: Matrix Double} deriving (Show)
 
   type TrainingSet = [TrainingCase]
-
 
   ---------------------------------------------------------------------------------
   -- FUNCTIONS
   ---------------------------------------------------------------------------------
 
-  -- Trains network on a single training case
-
+  -- | Trains network on a single training case
   trainOnCase :: NeuralNetwork -> TrainingCase -> Double -> NeuralNetwork
   trainOnCase network trainingCase learningRate = NeuralNetwork.learn (input trainingCase) (expected trainingCase) learningRate network
 
-  -- Trains network on given dataset
-
+  -- | Trains network on given dataset
   trainOnSet :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
   trainOnSet network [] _ = network
   trainOnSet network (x:xs) learningRate = trainOnSet (trainOnCase network x learningRate) xs learningRate
 
+  -- | Shuffles training set
   trainingSetShuffle :: TrainingSet -> IO TrainingSet
   trainingSetShuffle = Shuffle.shuffleM
-  
+
+  -- | ???
   epochTraining :: NeuralNetwork -> TrainingSet -> Double -> Int -> NeuralNetwork
   epochTraining network _ _ 0 = network
   epochTraining network trainingSet learningRate epochsNumber = epochTraining newNetwork trainingSet learningRate epochsNumber
     where newNetwork = trainOnSet network trainingSet learningRate
-      
+
 
   {-
   -- Int list representation of test case input:
