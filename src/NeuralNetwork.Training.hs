@@ -1,4 +1,4 @@
-module NeuralNetwork.Training (TrainingCase, TrainingSet, intListToTrainingCase, train) where
+module NeuralNetwork.Training (TrainingCase, TrainingSet, intListToTrainingCase, intListToTrainingSet, singleCaseTrain, setTrain) where
 
   import Data.Matrix as Matrix
   import NeuralNetwork 
@@ -22,9 +22,9 @@ module NeuralNetwork.Training (TrainingCase, TrainingSet, intListToTrainingCase,
   
   -- Trains network on given dataset
   
-  train :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
-  train network [] _ = network
-  train network (x:xs) learningRate = train (singleCaseTrain network x learningRate) xs learningRate
+  setTrain :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
+  setTrain network [] _ = network
+  setTrain network (x:xs) learningRate = setTrain (singleCaseTrain network x learningRate) xs learningRate
   
   
   
@@ -85,3 +85,9 @@ module NeuralNetwork.Training (TrainingCase, TrainingSet, intListToTrainingCase,
       where
           intListInput = take 10 intList
           intOutput = head.reverse.(take 11) $ intList
+          
+          
+  intListToTrainingSet :: [Int] -> TrainingSet
+  intListToTrainingSet list = 
+      if length list < 11 then []
+                          else [ intListToTrainingCase list ] ++ (intListToTrainingSet (drop 11 list))
