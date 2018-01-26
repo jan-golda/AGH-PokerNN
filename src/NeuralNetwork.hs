@@ -1,4 +1,4 @@
-module NeuralNetwork (NeuralNetwork, Layer(Layer), feed, learn) where
+module NeuralNetwork (NeuralNetwork, Layer(Layer, weights, biases), feed, learn) where
 
   import Data.Matrix as Matrix
 
