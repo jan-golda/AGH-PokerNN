@@ -19,7 +19,7 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
   writeNeuralNetwork path network = writeFile path (unparseFile . serializeNetwork $ network)
 
   ---------------------------------------------------------------------------------
-  -- SRIALIZATION FUNCTIONS
+  -- SERIALIZATION FUNCTIONS
   ---------------------------------------------------------------------------------
 
   deserializeLayer :: [Double] -> [Double] -> Layer
