@@ -1,5 +1,9 @@
 module PokerNN where
 
+  import NeuralNetwork.Training
+  
+  import Data.Matrix as Matrix
+
   -- Converts Int list TestCase input representation to proper Matrix compatible with NeuralNetwork input
 
   intListToMatrixInput :: [Int] -> Matrix Double
