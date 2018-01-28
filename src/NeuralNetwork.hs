@@ -3,7 +3,7 @@
 --        weights - list of wieghts, grouped by neurons
 --        biases - list of biases
 
-module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, biases), feed, learn, stringToNetwork, networkToString, calculateCostGradient) where
+module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, biases), feed, stringToNetwork, networkToString, calculateCostGradient) where
 
   import Data.Matrix as Matrix
 
@@ -27,12 +27,14 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
   feed []     input = input
   feed (l:ls) input = feed ls (layerOutput l input)
 
+  {-
   -- | Performs network learning on a given dataset with gradient descent cost function minimization
   learn :: Matrix Double -> Matrix Double -> Double -> NeuralNetwork -> NeuralNetwork
   learn input expected learningRate []      = []
   learn input expected learningRate network = newNetwork
       where (newNetwork, _) = backpropagation input expected learningRate network
-            
+      -}
+        
   -- | Converts String representation of network to actual NeuralNetwork
   stringToNetwork :: String -> NeuralNetwork
   stringToNetwork = deserializeNetwork . parseFile
@@ -101,7 +103,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
                 errorList = Matrix.toList error
                 prevOutputList = Matrix.toList prevOutput
 
-
+{-
   -- | Applies backpropagation learning algorithm to neural network
   backpropagation :: Matrix Double -> Matrix Double -> Double -> NeuralNetwork -> (NeuralNetwork, Matrix Double)
   
@@ -127,6 +129,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
             newBiases = Matrix.elementwise (+) (biases layer1) (Matrix.scaleMatrix learningRate derBiases)
         in
             ([ Layer newWeights newBiases ] ++ network, error)
+            -}
             
   ---------------------------------------------------------------------------------
   -- BACKPROPAGATION RELATED FUNCTIONS
@@ -135,7 +138,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
   -- | Applies backpropagation learning algorithm to neural network
   costBackpropagation :: NeuralNetwork -> Matrix Double -> Matrix Double -> (NetworkCostGradient, Matrix Double)
   
-  costBbackpropagation _ _ _ [] = error "Cannot perform backpropagation on empty network"
+  --costBackpropagation _ _ _ [] = error "Cannot perform backpropagation on empty network"
   
   costBackpropagation (layer:[]) input expected =
         let

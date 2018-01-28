@@ -6,23 +6,21 @@ module Main where
   import PokerNN
   
   
-  -- | Reads randomly generated network from file, then trains on 1000 training cases, finally saves trained network to new file
-  train :: IO ()
-  train =
-    readFile "./testNet.nn" >>= \netStr ->
-    readFile "../data/training.data" >>= \dataStr ->
+  -- | Reads network from file and trains on given TrainingSet, finally saves network to outputFile
+  train :: String -> String -> Int -> Int -> Double -> String -> IO ()
+  train networkFile dataFile cases epochs learningRate outputFile =
+    readFile networkFile >>= \netStr ->
+    readFile dataFile >>= \dataStr ->
         let 
             network = stringToNetwork netStr
-            trainingSet = stringToTrainingSet dataStr 10
-            trainedNetwork = epochTraining network trainingSet 0.5 1
-        --in putStrLn (show trainingSet)
-        in writeNeuralNetwork "./testNet2.nn" trainedNetwork
+            trainingSet = stringToTrainingSet dataStr cases
+            trainedNetwork = epochTraining network trainingSet learningRate epochs
+        in writeNeuralNetwork outputFile trainedNetwork
         
         
-  test :: IO ()
-  test = 
-      readFile "./testNet.nn" >>= \netStr ->
-      getLine >>= \testStr ->
+  test :: String -> String -> IO ()
+  test networkFile testStr = 
+      readFile networkFile >>= \netStr ->
     let 
         network = stringToNetwork netStr
         test = stringToInput testStr
@@ -32,5 +30,5 @@ module Main where
         putStr message
             
 
-  getRandom :: IO ()
-  getRandom = randomNeuralNetwork 52 [10, 10] >>= \network -> writeNeuralNetwork "./testNet.nn" network
+  getRandom :: [Int] -> String -> IO ()
+  getRandom layersInfo outputFile = randomNeuralNetwork 52 (layersInfo ++ [10]) >>= \network -> writeNeuralNetwork outputFile network
