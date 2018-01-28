@@ -18,6 +18,7 @@ module PokerNN (loadTrainingSet, stringToTrainingSet, outputToString, stringToIn
   stringToTrainingSet :: String -> Int -> TrainingSet
   stringToTrainingSet string casesNumber = take casesNumber $ intListToTrainingSet ( map (read :: String -> Int) (words string) )
   
+  -- | Converts regular poker hand String representation to network input (representation format: "QC, TD, AS, 2H, 3H" -> queen of clubs, ten of diamonds, ace of spades, deuce of hearts, three of hearts)
   stringToInput :: String -> Matrix Double
   stringToInput inputStr = intListToMatrixInput.
                                     ( foldl (++) [] ).

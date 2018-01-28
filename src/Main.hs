@@ -13,15 +13,15 @@ module Main where
     readFile "../data/training.data" >>= \dataStr ->
         let 
             network = stringToNetwork netStr
-            trainingSet = stringToTrainingSet dataStr 1000
-            trainedNetwork = epochTraining network trainingSet 0.5 10
+            trainingSet = stringToTrainingSet dataStr 10
+            trainedNetwork = epochTraining network trainingSet 0.5 1
         --in putStrLn (show trainingSet)
         in writeNeuralNetwork "./testNet2.nn" trainedNetwork
         
         
   test :: IO ()
   test = 
-      readFile "./testNet2.nn" >>= \netStr ->
+      readFile "./testNet.nn" >>= \netStr ->
       getLine >>= \testStr ->
     let 
         network = stringToNetwork netStr

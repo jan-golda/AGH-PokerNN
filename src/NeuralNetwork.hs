@@ -3,7 +3,7 @@
 --        weights - list of wieghts, grouped by neurons
 --        biases - list of biases
 
-module NeuralNetwork (NeuralNetwork, Layer(Layer, weights, biases), feed, learn, stringToNetwork, networkToString) where
+module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, biases), feed, learn, stringToNetwork, networkToString, calculateCostGradient) where
 
   import Data.Matrix as Matrix
 
@@ -14,6 +14,9 @@ module NeuralNetwork (NeuralNetwork, Layer(Layer, weights, biases), feed, learn,
   data Layer = Layer {weights :: Matrix Double, biases :: Matrix Double} deriving (Show)
 
   type NeuralNetwork = [Layer]
+  
+  -- | Type that has exactly the same structure as NeuralNetwork, but is intended to hold cost function gradient for whole network
+  type NetworkCostGradient = NeuralNetwork
 
   ---------------------------------------------------------------------------------
   -- MAIN FUNCTIONS
@@ -125,6 +128,36 @@ module NeuralNetwork (NeuralNetwork, Layer(Layer, weights, biases), feed, learn,
         in
             ([ Layer newWeights newBiases ] ++ network, error)
             
+  ---------------------------------------------------------------------------------
+  -- BACKPROPAGATION RELATED FUNCTIONS
+  ---------------------------------------------------------------------------------
+
+  -- | Applies backpropagation learning algorithm to neural network
+  costBackpropagation :: NeuralNetwork -> Matrix Double -> Matrix Double -> (NetworkCostGradient, Matrix Double)
+  
+  costBbackpropagation _ _ _ [] = error "Cannot perform backpropagation on empty network"
+  
+  costBackpropagation (layer:[]) input expected =
+        let
+            error = lastLayerError (weightedInput layer input) (layerOutput layer input) expected
+            derWeights = costDerivativeWithRespectToWeights input error
+            derBiases = costDerivativeWithRespectToBiases error
+        in
+            ([ Layer derWeights derBiases ], error)
+            
+  costBackpropagation (layer1:layer2:rest) input expected =
+        let
+            (gradient, nextError) = costBackpropagation (layer2:rest) (layerOutput layer1 input) expected
+            error = layerError (weightedInput layer1 input) (weights layer2) nextError
+            derWeights = costDerivativeWithRespectToWeights input error
+            derBiases = costDerivativeWithRespectToBiases error
+        in
+            ([ Layer derWeights derBiases ] ++ gradient, error)
+  
+  calculateCostGradient :: NeuralNetwork -> Matrix Double -> Matrix Double -> NetworkCostGradient
+  calculateCostGradient network input expected = gradient
+    where (gradient, _) = costBackpropagation network input expected
+  
   ---------------------------------------------------------------------------------
   -- SERIALIZATION FUNCTIONS
   ---------------------------------------------------------------------------------
