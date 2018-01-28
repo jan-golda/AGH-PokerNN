@@ -3,7 +3,7 @@
 --        weights - list of wieghts, grouped by neurons
 --        biases - list of biases
 
-module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer, serializeLayer, deserializeNetwork, serializeNetwork, randomNeuralNetwork, randomLayer) where
+module NeuralNetwork.IO (fromString, toString, deserializeLayer, serializeLayer, deserializeNetwork, serializeNetwork, randomNeuralNetwork, randomLayer) where
 
   import NeuralNetwork
 
@@ -14,13 +14,13 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
   -- MAIN FUNCTIONS
   ---------------------------------------------------------------------------------
 
-  -- | Reads NeuralNetwork from given file
-  readNeuralNetwork :: FilePath -> IO NeuralNetwork
-  readNeuralNetwork = fmap (deserializeNetwork . parseFile) . readFile
+  -- | Converts String representation of network to actual NeuralNetwork
+  fromString :: String -> NeuralNetwork
+  fromString = deserializeNetwork . parseFile
 
-  -- | Writes NeuralNetwork to given file
-  writeNeuralNetwork :: FilePath -> NeuralNetwork -> IO ()
-  writeNeuralNetwork path network = writeFile path (unparseFile . serializeNetwork $ network)
+  -- | Converts NeuralNetwork to String representation
+  toString :: NeuralNetwork -> String
+  toString = unparseFile . serializeNetwork
 
   -- | Generates random NeuralNetwork using normal distribution
   randomNeuralNetwork :: Int -> [Int] -> IO NeuralNetwork
@@ -67,20 +67,20 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
   ---------------------------------------------------------------------------------
 
   -- | Parses string to list of doubles
-  parseLine :: String -> [Double]
-  parseLine line = map read (words line)
+  stringToDoubleList :: String -> [Double]
+  stringToDoubleList line = map read (words line)
 
   -- | Parses list of doubles to string
-  unparseLine :: [Double] -> String
-  unparseLine list = unwords (map show list)
+  doubleListToString :: [Double] -> String
+  doubleListToString list = unwords (map show list)
 
   -- | Parses string to list of lists of doubles, where each sub list represents line in given string
   parseFile :: String -> [[Double]]
-  parseFile file = map parseLine (lines file)
+  parseFile file = map stringToDoubleList (lines file)
 
   -- | Parses list of lists of doubles to string, where each line represents sub list
   unparseFile :: [[Double]] -> String
-  unparseFile list = unlines (map unparseLine list)
+  unparseFile list = unlines (map doubleListToString list)
 
   -- | Creates one dimentional matrix with given size filled wih data from list
   toVector :: Int -> [a] -> Matrix a
@@ -88,7 +88,7 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
 
   -- | Creates matrix with given number of rows filled with data from list, number of columns is calculated as size of list divided by  number of rows
   toMatrix :: Int -> [a] -> Matrix a
-  toMatrix rows list = Matrix.fromList rows (quot (length list) rows) list
+  toMatrix rows list = Matrix.fromList rows (div (length list) rows) list
 
   -- | Creates matrix of given size filled with random normal distribution numbers
   normalDistributionMatrix :: Int -> Int -> IO (Matrix Double)

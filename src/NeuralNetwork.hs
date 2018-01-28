@@ -1,9 +1,4 @@
--- Format of NeuralNetwork String representation:
---    Each layer consists of two lines in file:
---        weights - list of wieghts, grouped by neurons
---        biases - list of biases
-
-module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, biases), feed, stringToNetwork, networkToString, calculateCostGradient) where
+module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, biases), feed, calculateCostGradient) where
 
   import Data.Matrix as Matrix
 
@@ -14,7 +9,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
   data Layer = Layer {weights :: Matrix Double, biases :: Matrix Double} deriving (Show)
 
   type NeuralNetwork = [Layer]
-  
+
   -- | Type that has exactly the same structure as NeuralNetwork, but is intended to hold cost function gradient for whole network
   type NetworkCostGradient = NeuralNetwork
 
@@ -34,14 +29,6 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
   learn input expected learningRate network = newNetwork
       where (newNetwork, _) = backpropagation input expected learningRate network
       -}
-        
-  -- | Converts String representation of network to actual NeuralNetwork
-  stringToNetwork :: String -> NeuralNetwork
-  stringToNetwork = deserializeNetwork . parseFile
-
-  -- | Converts NeuralNetwork to String representation
-  networkToString :: NeuralNetwork -> String
-  networkToString = unparseFile . serializeNetwork
 
   ---------------------------------------------------------------------------------
   -- NETWORK FUNCTIONS
@@ -106,9 +93,9 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
 {-
   -- | Applies backpropagation learning algorithm to neural network
   backpropagation :: Matrix Double -> Matrix Double -> Double -> NeuralNetwork -> (NeuralNetwork, Matrix Double)
-  
+
   backpropagation _ _ _ [] = error "Cannot perform backpropagation on empty network"
-  
+
   backpropagation input expected learningRate (layer:[]) =
         let
             error = lastLayerError (weightedInput layer input) (layerOutput layer input) expected
@@ -118,7 +105,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
             newBiases = Matrix.elementwise (+) (biases layer) (Matrix.scaleMatrix learningRate derBiases)
         in
             ([ Layer newWeights newBiases ], error)
-            
+
   backpropagation input expected learningRate (layer1:layer2:rest) =
         let
             (network, nextError) = backpropagation (layerOutput layer1 input) expected learningRate (layer2:rest)
@@ -130,16 +117,16 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
         in
             ([ Layer newWeights newBiases ] ++ network, error)
             -}
-            
+
   ---------------------------------------------------------------------------------
   -- BACKPROPAGATION RELATED FUNCTIONS
   ---------------------------------------------------------------------------------
 
   -- | Applies backpropagation learning algorithm to neural network
   costBackpropagation :: NeuralNetwork -> Matrix Double -> Matrix Double -> (NetworkCostGradient, Matrix Double)
-  
+
   --costBackpropagation _ _ _ [] = error "Cannot perform backpropagation on empty network"
-  
+
   costBackpropagation (layer:[]) input expected =
         let
             error = lastLayerError (weightedInput layer input) (layerOutput layer input) expected
@@ -147,7 +134,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
             derBiases = costDerivativeWithRespectToBiases error
         in
             ([ Layer derWeights derBiases ], error)
-            
+
   costBackpropagation (layer1:layer2:rest) input expected =
         let
             (gradient, nextError) = costBackpropagation (layer2:rest) (layerOutput layer1 input) expected
@@ -156,80 +143,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
             derBiases = costDerivativeWithRespectToBiases error
         in
             ([ Layer derWeights derBiases ] ++ gradient, error)
-  
+
   calculateCostGradient :: NeuralNetwork -> Matrix Double -> Matrix Double -> NetworkCostGradient
   calculateCostGradient network input expected = gradient
     where (gradient, _) = costBackpropagation network input expected
-  
-  ---------------------------------------------------------------------------------
-  -- SERIALIZATION FUNCTIONS
-  ---------------------------------------------------------------------------------
-
-  -- | Creates Layer from two lists of doubles, first containing wegihts, second containing biases
-  deserializeLayer :: [Double] -> [Double] -> Layer
-  deserializeLayer weights biases = Layer (toMatrix n weights) (toVector n biases)
-      where
-        n = length biases
-
-  -- | Creates list of doubles from Layer, in format: [[--weights--],[--biases--]]
-  serializeLayer :: Layer -> [[Double]]
-  serializeLayer layer = [Matrix.toList (weights layer), Matrix.toList (biases layer)]
-
-  -- | Creates NeuralNetwork from list of lists of doubles, number of lists has to be even
-  deserializeNetwork :: [[Double]] -> NeuralNetwork
-  deserializeNetwork []         = []
-  deserializeNetwork (a:[])     = error "Number of network data rows must be even"
-  deserializeNetwork (a:b:rest) = deserializeLayer a b : deserializeNetwork rest
-
-  -- | Creates list of lists of doubles from NeuralNetwork, returned list will always have even number of lists
-  serializeNetwork :: NeuralNetwork -> [[Double]]
-  serializeNetwork []           = []
-  serializeNetwork (layer:rest) = serializeLayer layer ++ serializeNetwork rest
-
-  ---------------------------------------------------------------------------------
-  -- UTILITY FUNCTIONS
-  ---------------------------------------------------------------------------------
-
-  -- | Parses string to list of doubles
-  stringToDoubleList :: String -> [Double]
-  stringToDoubleList line = map read (words line)
-
-  -- | Parses list of doubles to string
-  doubleListToString :: [Double] -> String
-  doubleListToString list = unwords (map show list)
-
-  -- | Parses string to list of lists of doubles, where each sub list represents line in given string
-  parseFile :: String -> [[Double]]
-  parseFile file = map stringToDoubleList (lines file)
-
-  -- | Parses list of lists of doubles to string, where each line represents sub list
-  unparseFile :: [[Double]] -> String
-  unparseFile list = unlines (map doubleListToString list)
-
-  -- | Creates one dimentional matrix with given size filled wih data from list
-  toVector :: Int -> [a] -> Matrix a
-  toVector rows list = Matrix.fromList rows 1 list
-
-  -- | Creates matrix with given number of rows filled with data from list, number of columns is calculated as size of list divided by  number of rows
-  toMatrix :: Int -> [a] -> Matrix a
-  toMatrix rows list = Matrix.fromList rows (div (length list) rows) list
-  
-
-{-
-
-  -- Little network sample for testing purposes
-  ll = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-  w1 = Matrix.fromList 3 2 ll
-  w2 = Matrix.fromList 2 3 ll
-  b1 = Matrix.fromList 3 1 [0.5, 0.5, 0.5]
-  b2 = Matrix.fromList 2 1 [0.5, 0.5]
-  layer1 = Layer w1 b1
-  layer2 = Layer w2 b2
-  network = [layer1, layer2]
-  input = Matrix.fromList 2 1 [0.0, 1]
-  expected = Matrix.fromList 2 1 [1.0, 0]
-  ratio = 0.4
-
-  test = learn input expected ratio
-
-  -}
