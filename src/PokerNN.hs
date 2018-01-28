@@ -1,8 +1,10 @@
-module PokerNN (loadTrainingSet, stringToTrainingSet) where
+module PokerNN (loadTrainingSet, stringToTrainingSet, outputToString, stringToInput) where
 
   import NeuralNetwork.Training
 
   import Data.Matrix as Matrix
+  
+  import Data.Char as Char
 
   ---------------------------------------------------------------------------------
   -- MAIN FUNCTIONS
@@ -15,7 +17,32 @@ module PokerNN (loadTrainingSet, stringToTrainingSet) where
   -- | Converts raw String TrainingSet representation to actual TrainingSet
   stringToTrainingSet :: String -> Int -> TrainingSet
   stringToTrainingSet string casesNumber = take casesNumber $ intListToTrainingSet ( map (read :: String -> Int) (words string) )
+  
+  stringToInput :: String -> Matrix Double
+  stringToInput inputStr = intListToMatrixInput.
+                                    ( foldl (++) [] ).
+                                    ( map ( \(r:s:[]) ->
+                                    [ fst.head $ ( filter (\x -> (snd x) == s) suits ),
+                                      fst.head $ ( filter (\x -> (snd x) == r) ranks ) ]
+                                    ) ).words.
+                                    (map (Char.toUpper)) $ inputStr
+      where suits = [ (1, 'H'), (2, 'S'), (3, 'D'), (4, 'C') ]
+            ranks = [ (1, 'A'), (2, '2'), (3, '3'), (4, '4'), (5, '5'), (6, '6'), (7, '7'), (8, '8'), (9, '9'), (10, 'T'), (11, 'J'), (12, 'Q'), (13, 'K') ]
 
+  -- | Converts network output to readable String
+  outputToString :: Matrix Double -> String
+  outputToString output = foldl (++) "" $ map ( \(x, y) -> x ++ ": " ++ (show . truncate $ ( y * 100 ) ) ++ "%\n" ) $ zip pokerHands (Matrix.toList output)
+    where pokerHands = [ "High card",
+                         "One pair",
+                         "Two pairs",
+                         "Three of a kind",
+                         "Straight",
+                         "Flush",
+                         "Full house",
+                         "Four of a kind",
+                         "Straight flush",
+                         "Royal flush" ]
+                         
   ---------------------------------------------------------------------------------
   -- UTILITY FUNCTIONS
   ---------------------------------------------------------------------------------

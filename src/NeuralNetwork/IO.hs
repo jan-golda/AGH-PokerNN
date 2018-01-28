@@ -27,7 +27,7 @@ module NeuralNetwork.IO (readNeuralNetwork, writeNeuralNetwork, deserializeLayer
   randomNeuralNetwork nInputs [] = return []
   randomNeuralNetwork nInputs (n:rest) = do
       layer   <- randomLayer nInputs n
-      network <- randomNeuralNetwork nInputs rest
+      network <- randomNeuralNetwork n rest
       return (layer : network)
 
   -- | Generates random Layer using normal distribution

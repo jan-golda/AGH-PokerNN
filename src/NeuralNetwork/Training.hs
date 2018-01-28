@@ -33,7 +33,7 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   -- | ???
   epochTraining :: NeuralNetwork -> TrainingSet -> Double -> Int -> NeuralNetwork
   epochTraining network _ _ 0 = network
-  epochTraining network trainingSet learningRate epochsNumber = epochTraining newNetwork trainingSet learningRate epochsNumber
+  epochTraining network trainingSet learningRate epochsNumber = epochTraining newNetwork trainingSet learningRate (epochsNumber - 1)
     where newNetwork = trainOnSet network trainingSet learningRate
 
 
