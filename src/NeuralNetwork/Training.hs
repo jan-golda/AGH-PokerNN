@@ -21,20 +21,13 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   trainOnCase :: NeuralNetwork -> TrainingCase -> Double -> NeuralNetwork
   trainOnCase network trainingCase learningRate = trainOnSet network [trainingCase] learningRate
 
-  {-
-  -- | Trains network on given dataset
-  trainOnSet :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
-  trainOnSet network [] _ = network
-  trainOnSet network (x:xs) learningRate = trainOnSet (trainOnCase network x learningRate) xs learningRate
-  -}
-
   -- | Trains network on given TrainingSet
   trainOnSet :: NeuralNetwork -> TrainingSet -> Double -> NeuralNetwork
   trainOnSet network trainingSet learningRate =
       let
          totalGradient = totalCostGradient network trainingSet
          n = fromIntegral (length trainingSet) :: Double
-         descent = scaleGradient totalGradient ((-learningRate)/(2*n))
+         descent = scaleGradient totalGradient ((learningRate)/(n))
       in applyGradientDescent network descent
 
   -- | Performs repetitive training over given TrainingSet
@@ -67,8 +60,8 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   scaleGradient [] _ = []
   scaleGradient (layer : rest) scalar = [(Layer scaledWeights scaledBiases)] ++ (scaleGradient rest scalar)
     where
-        scaledWeights = Matrix.fromList (Matrix.nrows (weights layer)) (Matrix.ncols (weights layer)) $ map (\x -> x * scalar) (Matrix.toList (weights layer))
-        scaledBiases = Matrix.fromList (Matrix.nrows (biases layer)) (Matrix.ncols (biases layer)) $ map (\x -> x * scalar) (Matrix.toList (biases layer))
+        scaledWeights = Matrix.scaleMatrix scalar (weights layer)
+        scaledBiases = Matrix.scaleMatrix scalar (biases layer)
 
   -- | Shuffles training set
   trainingSetShuffle :: TrainingSet -> IO TrainingSet
