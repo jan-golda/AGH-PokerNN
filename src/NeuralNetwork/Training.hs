@@ -1,8 +1,6 @@
-module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), TrainingSet, trainOnCase, trainOnSet, trainingSetShuffle, epochTraining) where
+module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), TrainingSet, trainOnCase, trainOnSet, epochTraining) where
 
   import NeuralNetwork
-
-  import System.Random.Shuffle as Shuffle
   import Data.Matrix as Matrix
 
   ---------------------------------------------------------------------------------
@@ -62,7 +60,3 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
     where
         scaledWeights = Matrix.scaleMatrix scalar (weights layer)
         scaledBiases = Matrix.scaleMatrix scalar (biases layer)
-
-  -- | Shuffles training set
-  trainingSetShuffle :: TrainingSet -> IO TrainingSet
-  trainingSetShuffle = Shuffle.shuffleM
