@@ -22,6 +22,8 @@ description:         Please see the README on Github at <https://github.com/regz
 dependencies:
 - base >= 4.7 && < 5
 - matrix
+- normaldistribution
+- random-shuffle
 
 library:
   source-dirs: src
