@@ -24,6 +24,7 @@ dependencies:
 - matrix
 - normaldistribution
 - random-shuffle
+- parallel
 
 library:
   source-dirs: src

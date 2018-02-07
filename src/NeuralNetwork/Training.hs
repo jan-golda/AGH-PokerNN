@@ -1,5 +1,7 @@
 module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), TrainingSet, trainOnCase, trainOnSet, epochTraining) where
 
+  import Control.Parallel
+
   import NeuralNetwork
   import Data.Matrix as Matrix
 
@@ -42,7 +44,10 @@ module NeuralNetwork.Training (TrainingCase(TrainingCase, input, expected), Trai
   totalCostGradient :: NeuralNetwork -> TrainingSet -> NetworkCostGradient
   totalCostGradient _ [] = error "Cannot calculate NetworkCostGradient for empty TrainingSet"
   totalCostGradient network (lastCase : []) = calculateCostGradient network (input lastCase) (expected lastCase)
-  totalCostGradient network (testCase : set) = sumCostGradient (calculateCostGradient network (input testCase) (expected testCase)) (totalCostGradient network set)
+  totalCostGradient network (testCase : set) = par case1 (pseq case2 (sumCostGradient case1 case2))
+        where
+          case1 = calculateCostGradient network (input testCase) (expected testCase)
+          case2 = totalCostGradient network set
 
   -- | Sums two NetworkCostGradients
   sumCostGradient :: NetworkCostGradient -> NetworkCostGradient -> NetworkCostGradient
