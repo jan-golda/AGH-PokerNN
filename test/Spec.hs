@@ -1,5 +1,7 @@
 
 import Test.HUnit
+import Test.QuickCheck
+import Test.QuickCheck.Monadic as QCM
 
 import Data.Matrix as Matrix
 
@@ -8,7 +10,9 @@ import NeuralNetwork.IO
 
 -- run tests
 main :: IO Counts
-main = runTestTT (TestList [nnTests, ioTests])
+main = do
+  ioQuick
+  runTestTT (TestList [nnTests, ioTests])
 
 -- NeuralNetworks used during tests
 nn1 = [Layer (Matrix.fromList 2 3 [14.0, 9.99, 0.4, 1.3, 1.9, 9.7]) (Matrix.fromList 2 1 [3.54, 0.11])]
@@ -114,3 +118,33 @@ testToString3 :: Test
 testToString3 = TestCase $ assertEqual "NN wrongly writed to string"
       "14.0 9.99 0.4 1.3 1.9 9.7\n3.54 0.11\n2.0 0.0 0.7 4.4 11.45 3.22\n3.3 15.0 7.77\n1.1 2.2 3.3\n322.0\n"
       (toString nn3)
+
+---------------------------------------------------------------------------------
+-- QuickCheck: NeuralNetwork.IO
+---------------------------------------------------------------------------------
+ioQuick = do
+      putStr "\nrandomLayer:\t\t"
+      quickCheck quickRandomLayer
+      putStr "randomNetwork:\t\t"
+      quickCheck quickRandomNetwork
+      putStr "parseFile:\t\t"
+      quickCheck quickParseFile
+
+quickRandomLayer :: Int -> Int -> Property
+quickRandomLayer nInputs n = monadicIO $ do
+      layer <- run $ randomLayer nInputs n
+      QCM.assert (checkSize n 1 (biases layer) && checkSize n nInputs (weights layer))
+
+quickRandomNetwork :: Int -> [Int] -> Property
+quickRandomNetwork nInputs layers = monadicIO $ do
+      net <- run $ randomNeuralNetwork nInputs layers
+      QCM.assert (length net == length layers)
+
+quickParseFile :: [[Double]] -> Bool
+quickParseFile list = parseFile (unparseFile list) == list
+
+---------------------------------------------------------------------------------
+-- UTILIY
+---------------------------------------------------------------------------------
+checkSize :: Int -> Int -> Matrix a -> Bool
+checkSize rows cols m = (nrows m == rows) && (ncols m == cols)

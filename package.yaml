@@ -51,3 +51,4 @@ tests:
     dependencies:
     - PokerNN
     - HUnit
+    - QuickCheck

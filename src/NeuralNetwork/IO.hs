@@ -3,7 +3,7 @@
 --        weights - list of wieghts, grouped by neurons
 --        biases - list of biases
 
-module NeuralNetwork.IO (fromString, toString, randomNeuralNetwork, randomLayer) where
+module NeuralNetwork.IO (fromString, toString, randomNeuralNetwork, randomLayer, parseFile, unparseFile) where
 
   import NeuralNetwork
 
