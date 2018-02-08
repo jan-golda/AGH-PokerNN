@@ -6,7 +6,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
   -- TYPE DEFINITIONS
   ---------------------------------------------------------------------------------
 
-  data Layer = Layer {weights :: Matrix Double, biases :: Matrix Double} deriving (Show)
+  data Layer = Layer {weights :: Matrix Double, biases :: Matrix Double} deriving (Show, Eq)
 
   type NeuralNetwork = [Layer]
 
@@ -21,12 +21,12 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
   feed :: NeuralNetwork -> Matrix Double -> Matrix Double
   feed []     input = input
   feed (l:ls) input = feed ls (layerOutput l input)
-  
+
   -- | Calculates cost function gradient with respect to all weights and biases in network
   calculateCostGradient :: NeuralNetwork -> Matrix Double -> Matrix Double -> NetworkCostGradient
   calculateCostGradient network input expected = gradient
     where (gradient, _) = costBackpropagation network input expected
-      
+
 
   ---------------------------------------------------------------------------------
   -- NETWORK FUNCTIONS
@@ -86,7 +86,7 @@ module NeuralNetwork (NeuralNetwork, NetworkCostGradient, Layer(Layer, weights, 
               where
                 errorList = Matrix.toList error
                 prevOutputList = Matrix.toList prevOutput
-            
+
 
   ---------------------------------------------------------------------------------
   -- BACKPROPAGATION RELATED FUNCTIONS
